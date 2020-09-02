@@ -3,7 +3,7 @@ from pathlib import Path
 import numpy as np
 import torch
 from pytorch_pretrained_biggan import BigGAN, one_hot_from_int, truncated_noise_sample
-from scipy.misc import toimage
+from sklearn.externals._pilutil import toimage
 from tqdm import tqdm
 
 print('[info] detecting device...')
@@ -87,6 +87,5 @@ if __name__ == '__main__':
 
     for index in class_indices:
         images = generate_images(number_images, index, model, truncation=.9)
-        img_gen = enhance(images)
-
-        save_images(img_gen, f'c{index}-enhanced')
+        # img_gen = enhance(images)
+        # save_images(img_gen, f'c{index}-enhanced')
