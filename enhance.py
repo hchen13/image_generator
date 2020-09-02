@@ -34,8 +34,8 @@ def show_image(*images, width=None, col=None, wait=0, title=None, destroy=False)
             cv2.destroyAllWindows()
 
 if __name__ == '__main__':
-    image = Image.open('exports/c497/0.jpg')
-    origin = np.array(image)
+    image_path = 'exports/c497/0.jpg'
+    origin = cv2.imread(image_path)
     rdn = RRDN(weights='gans')
     output = rdn.predict(origin)
     show_image(origin, output, width=1000)
