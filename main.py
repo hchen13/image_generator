@@ -69,14 +69,15 @@ def enhance(images):
 
     print('[info] initializing models...')
     tick = datetime.now()
-    m1 = RRDN(weights='gans')
+    # m1 = RRDN(weights='gans')
+    m1 = RDN(weights='psnr-large')
     m2 = RDN(weights='noise-cancel')
     tock = datetime.now()
     print(f"[info] complete, time elapsed: {(tock - tick).total_seconds():.1f}s.\n")
 
     for image in tqdm(images):
         enhanced = m2.predict(image)
-        # enhanced = m2.predict(enhanced, by_patch_of_size=256)
+        enhanced = m2.predict(enhanced)
         yield enhanced
 
 
