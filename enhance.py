@@ -36,6 +36,12 @@ def show_image(*images, width=None, col=None, wait=0, title=None, destroy=False)
 if __name__ == '__main__':
     image_path = 'exports/c497/0.jpg'
     origin = cv2.imread(image_path)
+    print('[info] initializing model...')
     rdn = RRDN(weights='gans')
+    print("[info] complete.\n")
+
+    print('[info] predicting...')
     output = rdn.predict(origin)
+    print("[info] done.\n")
+    print(output.shape)
     show_image(origin, output, width=1000)
