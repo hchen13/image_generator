@@ -4,6 +4,7 @@ import numpy as np
 import torch
 from pytorch_pretrained_biggan import BigGAN, one_hot_from_int, truncated_noise_sample
 from scipy.misc import toimage
+from tqdm import tqdm
 
 print('[info] detecting device...')
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -59,6 +60,23 @@ def save_images(images, folder):
         cv2.imwrite(path, image_bgr)
 
 
+def enhance(images):
+    from ISR.models import RDN, RRDN
+    from datetime import datetime
+
+    print('[info] initializing models...')
+    tick = datetime.now()
+    m1 = RRDN(weights='gans')
+    m2 = RDN(weights='noise-cancel')
+    tock = datetime.now()
+    print(f"[info] complete, time elapsed: {(tock - tick).total_seconds():.1f}s.\n")
+
+    for image in tqdm(images):
+        enhanced = m1.predict(image)
+        enhanced = m2.predict(enhanced, by_patch_of_size=256)
+        yield enhanced
+
+
 if __name__ == '__main__':
     class_indices = [497]
     number_images = 20
@@ -69,4 +87,6 @@ if __name__ == '__main__':
 
     for index in class_indices:
         images = generate_images(number_images, index, model, truncation=.9)
-        save_images(images, f'c{index}')
+        img_gen = enhance(images)
+
+        save_images(img_gen, f'c{index}-enhanced')
