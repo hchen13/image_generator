@@ -55,7 +55,8 @@ def save_images(images, folder):
     os.makedirs(dir, exist_ok=True)
     for i, image in enumerate(images):
         path = os.path.join(dir, f'{i}.jpg')
-        cv2.imwrite(path, image)
+        image_bgr = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+        cv2.imwrite(path, image_bgr)
 
 
 if __name__ == '__main__':
