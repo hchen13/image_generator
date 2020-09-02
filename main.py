@@ -7,6 +7,7 @@ from sklearn.externals._pilutil import toimage
 from tqdm import tqdm
 
 print('[info] detecting device...')
+torch.cuda.empty_cache()
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print(f'[info] device: {device}')
 output_root = './exports/'
@@ -47,6 +48,7 @@ def generate_images(num_images, class_index, model, truncation: float=1.):
             image = np.array(toimage(out))
             images.append(image)
     print('[info] done.\n')
+    torch.cuda.empty_cache()
     return images
 
 
@@ -73,8 +75,8 @@ def enhance(images):
     print(f"[info] complete, time elapsed: {(tock - tick).total_seconds():.1f}s.\n")
 
     for image in tqdm(images):
-        enhanced = m1.predict(image)
-        enhanced = m2.predict(enhanced, by_patch_of_size=256)
+        enhanced = m2.predict(image)
+        # enhanced = m2.predict(enhanced, by_patch_of_size=256)
         yield enhanced
 
 
@@ -88,5 +90,6 @@ if __name__ == '__main__':
 
     for index in class_indices:
         images = generate_images(number_images, index, model, truncation=.9)
-        # img_gen = enhance(images)
-        # save_images(img_gen, f'c{index}-enhanced')
+        save_images(images, f'c{index}')
+        img_gen = enhance(images)
+        save_images(img_gen, f'c{index}-enhanced')
