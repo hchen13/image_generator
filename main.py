@@ -37,6 +37,7 @@ def generate_images(num_images, class_index, model, truncation: float=1.):
     print(f'[info] generating {num_images} images of class index {class_index}...')
     images = []
     for i in range(0, num_images, batch_size):
+        torch.cuda.empty_cache()
         noise_feed = noise_tensor[i : i + batch_size]
         class_feed = class_tensor[i : i + batch_size]
         with torch.no_grad():
