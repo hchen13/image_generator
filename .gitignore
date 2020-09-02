@@ -2,3 +2,5 @@
 .idea/
 biggan-*/
 *.sh
+exports/
+log_file
