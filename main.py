@@ -6,6 +6,8 @@ from pytorch_pretrained_biggan import BigGAN, one_hot_from_int, truncated_noise_
 from sklearn.externals._pilutil import toimage
 from tqdm import tqdm
 
+from enhance import enhance
+
 print('[info] detecting device...')
 torch.cuda.empty_cache()
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -61,24 +63,6 @@ def save_images(images, folder):
         path = os.path.join(dir, f'{i}.jpg')
         image_bgr = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
         cv2.imwrite(path, image_bgr)
-
-
-def enhance(images):
-    from ISR.models import RDN, RRDN
-    from datetime import datetime
-
-    print('[info] initializing models...')
-    tick = datetime.now()
-    # m1 = RRDN(weights='gans')
-    m1 = RDN(weights='psnr-large')
-    m2 = RDN(weights='noise-cancel')
-    tock = datetime.now()
-    print(f"[info] complete, time elapsed: {(tock - tick).total_seconds():.1f}s.\n")
-
-    for image in tqdm(images):
-        enhanced = m2.predict(image)
-        enhanced = m2.predict(enhanced)
-        yield enhanced
 
 
 if __name__ == '__main__':

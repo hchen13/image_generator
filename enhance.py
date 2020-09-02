@@ -1,9 +1,13 @@
+import os
 from datetime import datetime
+from glob import glob
+from pathlib import Path
 
 import cv2
 import numpy as np
 from ISR.models import RRDN, RDN
 from PIL import Image
+from tqdm import tqdm
 
 
 def show_image(*images, width=None, col=None, wait=0, title=None, destroy=False):
@@ -35,28 +39,37 @@ def show_image(*images, width=None, col=None, wait=0, title=None, destroy=False)
         if destroy:
             cv2.destroyAllWindows()
 
-if __name__ == '__main__':
-    image_path = 'exports/c497/0.jpg'
-    origin = cv2.imread(image_path)
 
-    print('[info] initializing model...')
+def enhance(images):
+    print('[info] initializing models...')
     tick = datetime.now()
-    m1 = RRDN(weights='gans')
+    # m1 = RRDN(weights='gans')
     m2 = RDN(weights='noise-cancel')
     tock = datetime.now()
     print(f"[info] complete, time elapsed: {(tock - tick).total_seconds():.1f}s.\n")
 
-    print('[info] enlarging...')
-    tick = datetime.now()
-    enlarged = m1.predict(origin)
-    tock = datetime.now()
-    print(f"[info] done, time elapsed: {(tock - tick).total_seconds():.2f}s")
+    for image in tqdm(images):
+        enhanced = m2.predict(image)
+        # enhanced = m2.predict(enhanced, by_patch_of_size=500)
+        yield enhanced
 
-    print('[info] cancelling noise...')
-    tick = datetime.now()
-    cancelled = m2.predict(enlarged, by_patch_of_size=50)
-    tock = datetime.now()
-    print(f"[info] done, time elapsed: {(tock - tick).total_seconds():.2f}s\n")
 
-    print(f"original image size: {origin.shape}, enlarged size: {enlarged.shape}, final size: {cancelled.shape}")
-    show_image(origin, enlarged, cancelled, width=1000)
+if __name__ == '__main__':
+    print('[info] initializing models...')
+    tick = datetime.now()
+    # m1 = RRDN(weights='gans')
+    m1 = RDN(weights='psnr-large')
+    m2 = RDN(weights='noise-cancel')
+    tock = datetime.now()
+    print(f"[info] complete, time elapsed: {(tock - tick).total_seconds():.1f}s.\n")
+
+    index = 497
+    folder = f'c{index}'
+    pattern = os.path.join('./exports', folder, '*.jpg')
+    image_paths = glob(pattern)
+    images = [cv2.imread(p) for p in image_paths]
+    for i, origin in enumerate(images):
+        e1 = m1.predict(origin)
+        e2 = m2.predict(e1, by_patch_of_size=400)
+        show_image(origin, e1, e2, col=2, width=1200)
+        break
